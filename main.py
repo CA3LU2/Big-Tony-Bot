@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-from discord import app_commands  # <- only valid for py-cord
+from discord import app_commands
 import os
 import random
 
