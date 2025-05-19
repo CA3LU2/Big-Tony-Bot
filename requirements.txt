@@ -1,2 +1,2 @@
-py-cord==2.4.1
+git+https://github.com/Pycord-Development/pycord.git
 Flask
