@@ -1,11 +1,22 @@
 import discord
 from discord.ext import commands, tasks
-from discord import app_commands  # works only with py-cord
+from discord import app_commands
+from flask import Flask
+from threading import Thread
 import os
 import random
 
-intents = discord.Intents.all()
-bot = commands.Bot(command_prefix="!", intents=intents)
+# === Keep Alive Server ===
+app = Flask(__name__)
+@app.route('/')
+def home():
+    return "Big Tony's alive and whackin'."
+def run():
+    app.run(host='0.0.0.0', port=8080)
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+keep_alive()
 
 # === Game State ===
 game_lobby = []
@@ -15,15 +26,15 @@ day_votes = {}
 dead_players = []
 silenced_players = []
 protected_players = set()
+duplicated_voters = set()
+lovers = set()
+vengeful_targets = {}
+bodyguard_target = None
+bodyguard_last_target = None
 doctor_target = None
 game_started = False
 phase = "day"
-vote_timer = 60  # seconds
-lovers = set()
-duplicated_voters = set()
-bodyguard_target = None
-bodyguard_last_target = None
-vengeful_targets = {}
+vote_timer = 60
 
 death_messages = [
     "was found face-first in marinara sauce.",
@@ -48,6 +59,9 @@ extended_roles = {
     "Friend-zoned Martian": "Silences someone during the day.",
     "Doctor": "Protects one player per night (can be self). Blocks both kills and silencing."
 }
+
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
@@ -255,7 +269,7 @@ async def help(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="roles", description="See role descriptions.")
-async def roles(interaction: discord.Interaction):
+async def roles_cmd(interaction: discord.Interaction):
     embed = discord.Embed(title="Big Tony's Role Guide", color=0xC28840)
     for role, desc in extended_roles.items():
         embed.add_field(name=role, value=desc, inline=False)
